@@ -1,5 +1,6 @@
 import luigi
 
+from loading_pipeline.lib.annotations.expression_helpers import get_expr_for_variant_id
 from loading_pipeline.lib.core.dataset_type import DatasetType
 from loading_pipeline.lib.core.definitions import ReferenceGenome
 from loading_pipeline.lib.paths import reference_dataset_parquet
@@ -31,7 +32,11 @@ class UpdatedReferenceDatasetParquetTask(luigi.Task):
         )
 
     def run(self):
-        df = self.reference_dataset.get_spark_dataframe(self.reference_genome)
+        ht = self.reference_dataset.get_ht(self.reference_genome)
+        ht = ht.annotate(
+            variant_id=get_expr_for_variant_id(ht),
+        )
+        df = ht.to_spark(flatten=False)
         df.write.parquet(
             self.output().path,
             mode='overwrite',
