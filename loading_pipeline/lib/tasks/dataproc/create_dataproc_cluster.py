@@ -56,6 +56,8 @@ def get_cluster_config(
                     'REFERENCE_GENOME': reference_genome.value,
                     'PIPELINE_RUNNER_APP_VERSION': Env.PIPELINE_RUNNER_APP_VERSION,
                     'REFERENCE_DATASETS_DIR': Env.REFERENCE_DATASETS_DIR,
+                    'VEP_CONFIG_PATH': '/vep_data/vep-gcloud.json',
+                    'VEP_REPLICATE': Env.GCLOUD_REGION,
                 },
                 'internal_ip_only': False,  # Recent change with 2.2 dataproc images.
                 'service_account': service_account_credentials.service_account_email,
