@@ -133,11 +133,7 @@ def get_cluster_config(
                     'execution_timeout': {'seconds': 1200},
                 },
                 {
-                    'executable_file': (
-                        f'gs://seqr-pipeline-runner-builds/{Env.DEPLOYMENT_TYPE}/{Env.PIPELINE_RUNNER_APP_VERSION}/bin/dataproc_vep_init.bash'
-                        if reference_genome == ReferenceGenome.GRCh38
-                        else f'gs://hail-common/hailctl/dataproc/{HAIL_VERSION}/vep-GRCh37.sh'
-                    ),
+                    'executable_file': f'gs://seqr-pipeline-runner-builds/{Env.DEPLOYMENT_TYPE}/{Env.PIPELINE_RUNNER_APP_VERSION}/bin/dataproc_vep_init.bash',
                     'execution_timeout': {'seconds': 1200},
                 },
             ],
