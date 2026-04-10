@@ -16,13 +16,16 @@ from loading_pipeline.lib.tasks.write_remapped_and_subsetted_callset import (
     WriteRemappedAndSubsettedCallsetTask,
 )
 from loading_pipeline.lib.tasks.write_validation_errors_for_run import (
-    WriteValidationErrorsForRunTask,
+    UpdatedValidationErrorsForRunTask,
 )
 from loading_pipeline.lib.test.misc import copy_project_pedigree_to_mocked_dir
 from loading_pipeline.lib.test.mocked_dataroot_testcase import MockedDatarootTestCase
 
 TEST_VCF = 'loading_pipeline/var/test/callsets/1kg_30variants.vcf'
 TEST_PEDIGREE_3_REMAP = 'loading_pipeline/var/test/pedigrees/test_pedigree_3_remap.tsv'
+TEST_PEDIGREE_3_DIFFERENT_FAMILIES = (
+    'loading_pipeline/var/test/pedigrees/test_pedigree_3_different_families.tsv'
+)
 TEST_PEDIGREE_4_REMAP = 'loading_pipeline/var/test/pedigrees/test_pedigree_4_remap.tsv'
 TEST_PEDIGREE_7 = 'loading_pipeline/var/test/pedigrees/test_pedigree_7.tsv'
 TEST_SEX_CHECK_1 = 'loading_pipeline/var/test/sex_check/test_sex_check_1.ht'
@@ -255,7 +258,7 @@ class WriteRemappedAndSubsettedCallsetTaskTest(MockedDatarootTestCase):
         worker.add(wrsc_task)
         worker.run()
         self.assertFalse(wrsc_task.complete())
-        write_validation_errors_task = WriteValidationErrorsForRunTask(
+        updated_validation_errors_task = UpdatedValidationErrorsForRunTask(
             reference_genome=ReferenceGenome.GRCh38,
             dataset_type=DatasetType.SNV_INDEL,
             sample_type=SampleType.WES,
@@ -264,8 +267,8 @@ class WriteRemappedAndSubsettedCallsetTaskTest(MockedDatarootTestCase):
             validations_to_skip=[ALL_VALIDATIONS],
             run_id=TEST_RUN_ID,
         )
-        self.assertTrue(write_validation_errors_task.complete())
-        with write_validation_errors_task.output().open('r') as f:
+        self.assertTrue(updated_validation_errors_task.complete())
+        with updated_validation_errors_task.output().open('r') as f:
             self.assertDictEqual(
                 json.load(f),
                 {
@@ -358,3 +361,100 @@ class WriteRemappedAndSubsettedCallsetTaskTest(MockedDatarootTestCase):
                     },
                 },
             )
+
+    @patch(
+        'loading_pipeline.lib.tasks.write_remapped_and_subsetted_callset.FeatureFlag',
+    )
+    def test_write_remapped_and_subsetted_callset_task_combined_validation_errors(
+        self,
+        mock_ff: Mock,
+    ) -> None:
+        copy_project_pedigree_to_mocked_dir(
+            TEST_PEDIGREE_3_DIFFERENT_FAMILIES,
+            ReferenceGenome.GRCh38,
+            DatasetType.SNV_INDEL,
+            SampleType.WGS,
+            'R0113_test_project',
+        )
+        worker = luigi.worker.Worker()
+
+        wrsc_task_1 = WriteRemappedAndSubsettedCallsetTask(
+            reference_genome=ReferenceGenome.GRCh38,
+            dataset_type=DatasetType.SNV_INDEL,
+            run_id=TEST_RUN_ID,
+            sample_type=SampleType.WGS,
+            callset_path=TEST_VCF,
+            project_guids=['R0113_test_project'],
+            project_i=0,
+            validations_to_skip=[ALL_VALIDATIONS],
+            skip_expect_tdr_metrics=True,
+        )
+        worker.add(wrsc_task_1)
+        worker.run()
+
+        # Second run: load pedigree 7 where all families fail validation checks
+        copy_project_pedigree_to_mocked_dir(
+            TEST_PEDIGREE_7,
+            ReferenceGenome.GRCh38,
+            DatasetType.SNV_INDEL,
+            SampleType.WGS,
+            'R0114_project4',
+        )
+        worker_2 = luigi.worker.Worker()
+
+        wrsc_task_2 = WriteRemappedAndSubsettedCallsetTask(
+            reference_genome=ReferenceGenome.GRCh38,
+            dataset_type=DatasetType.SNV_INDEL,
+            run_id=TEST_RUN_ID,
+            sample_type=SampleType.WGS,
+            callset_path=TEST_VCF,
+            project_guids=['R0114_project4'],
+            project_i=0,
+            validations_to_skip=[ALL_VALIDATIONS],
+            skip_expect_tdr_metrics=True,
+        )
+        worker_2.add(wrsc_task_2)
+        worker_2.run()
+
+        # Verify second task does not complete (all families failed)
+        self.assertFalse(wrsc_task_2.complete())
+
+        # Verify validation errors for second run
+        updated_validation_errors_task = UpdatedValidationErrorsForRunTask(
+            reference_genome=ReferenceGenome.GRCh38,
+            dataset_type=DatasetType.SNV_INDEL,
+            sample_type=SampleType.WES,
+            callset_path=TEST_VCF,
+            project_guids=['R0113_test_project', 'R0114_project4'],
+            validations_to_skip=[ALL_VALIDATIONS],
+            run_id=TEST_RUN_ID,
+        )
+        self.assertTrue(updated_validation_errors_task.complete())
+        with updated_validation_errors_task.output().open('r') as f:
+            validation_errors = json.load(f)
+
+        # Verify that all families failed in the second run
+        self.assertIn(
+            'All families failed validation checks',
+            validation_errors['error_messages'],
+        )
+        # Should have missing samples, sex checks, and ploidy checks all failing
+        failed_samples = validation_errors['failed_family_samples']
+        self.assertGreater(
+            len(failed_samples['missing_samples']),
+            0,
+            'Expected missing_samples to have failures',
+        )
+        self.assertGreater(
+            len(failed_samples['sex_check']),
+            0,
+            'Expected sex_check to have failures',
+        )
+        self.assertGreater(
+            len(failed_samples['ploidy_check']),
+            0,
+            'Expected ploidy_check to have failures',
+        )
+        # Verify that both project guids are in the validation errors
+        self.assertIn('R0113_test_project', validation_errors['project_guids'])
+        self.assertIn('R0114_project4', validation_errors['project_guids'])
