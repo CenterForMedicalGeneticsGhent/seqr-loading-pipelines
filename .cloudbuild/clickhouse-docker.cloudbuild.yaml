@@ -1,0 +1,12 @@
+# Run locally with:
+#
+# gcloud builds submit --quiet --config .cloudbuild/clickhouse-docker.cloudbuild.yaml loading_pipeline/deploy
+steps:
+- name: 'gcr.io/kaniko-project/executor:v1.3.0'
+  args:
+  - --destination=gcr.io/seqr-project/clickhouse-docker-image:${COMMIT_SHA}
+  - --dockerfile=Dockerfile.clickhouse
+  - --cache=true
+  - --cache-ttl=168h
+
+timeout: 1800s
