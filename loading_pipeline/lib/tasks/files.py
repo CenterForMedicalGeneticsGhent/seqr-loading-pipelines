@@ -35,8 +35,11 @@ class RawFileTask(luigi.Task):
 class VCFFileTask(RawFileTask):
     def complete(self) -> bool:
         # NB: hail supports reading glob bgz files.
+        path = self.pathname
+        if not path.startswith(('gs://', 's3://')):
+            path = os.path.abspath(path)
         try:
-            return len(hfs.ls(self.pathname)) > 0
+            return len(hfs.ls(path)) > 0
         except FileNotFoundError:
             return False
 
