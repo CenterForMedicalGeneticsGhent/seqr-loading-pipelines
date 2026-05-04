@@ -43,33 +43,33 @@ def validated_hl_function(
     return decorator
 
 
-def does_file_exist(path: str) -> bool:
-    if path.startswith('gs://'):
-        return hl.hadoop_exists(path)
-    return os.path.exists(path)
-
-
 def file_size_bytes(path: str) -> int:
-    size_bytes = 0
+    if not path.startswith(('gs://', 's3://')):
+        path = os.path.abspath(path)
+
     seen_files = set()
-    while True:
+
+    def traverse(current_path: str) -> int:
         try:
-            files = hfs.ls(path)
+            entries = hfs.ls(current_path)
         except FileNotFoundError:
-            break
-        has_directory = False
-        for f in files:
-            if f['path'] in seen_files:
+            return 0
+
+        local_size = 0
+        for entry in entries:
+            if entry.path in seen_files:
                 continue
-            if f['is_dir']:
-                has_directory = True
-                continue
-            size_bytes += f['size_bytes']
-            seen_files.add(f['path'])
-        if not has_directory:
-            break
-        path = os.path.join(path, '**')
-    return size_bytes
+            seen_files.add(entry.path)
+
+            if entry.typ == hfs.stat_result.FileType.FILE:
+                if not entry.path.endswith('.crc'):
+                    local_size += entry.size
+            elif entry.typ == hfs.stat_result.FileType.DIRECTORY:
+                local_size += traverse(entry.path)
+
+        return local_size
+
+    return traverse(path)
 
 
 def compute_hail_n_partitions(file_size_b: int) -> int:
