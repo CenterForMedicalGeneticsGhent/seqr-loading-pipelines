@@ -1,6 +1,7 @@
 import os
 
 import hail as hl
+import hailtop.fs as hfs
 import luigi
 from luigi.contrib import gcs
 
@@ -35,7 +36,7 @@ class RawFileTask(luigi.Task):
 class VCFFileTask(RawFileTask):
     def complete(self) -> bool:
         # NB: hail supports reading glob bgz files.
-        return len(hl.hadoop_ls(self.pathname)) > 0
+        return len(hfs.ls(self.pathname)) > 0
 
 
 class HailTableTask(RawFileTask):
