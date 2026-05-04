@@ -1,6 +1,5 @@
 import os
 
-import hail as hl
 import hailtop.fs as hfs
 import luigi
 from luigi.contrib import gcs
