@@ -53,7 +53,10 @@ def file_size_bytes(path: str) -> int:
     size_bytes = 0
     seen_files = set()
     while True:
-        files = hfs.ls(path)
+        try:
+            files = hfs.ls(path)
+        except FileNotFoundError:
+            break
         has_directory = False
         for f in files:
             if f['path'] in seen_files:

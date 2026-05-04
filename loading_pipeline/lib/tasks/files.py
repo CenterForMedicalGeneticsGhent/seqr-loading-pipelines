@@ -36,7 +36,10 @@ class RawFileTask(luigi.Task):
 class VCFFileTask(RawFileTask):
     def complete(self) -> bool:
         # NB: hail supports reading glob bgz files.
-        return len(hfs.ls(self.pathname)) > 0
+        try:
+            return len(hfs.ls(self.pathname)) > 0
+        except FileNotFoundError:
+            return False
 
 
 class HailTableTask(RawFileTask):
