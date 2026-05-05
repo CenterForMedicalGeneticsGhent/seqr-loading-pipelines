@@ -1,6 +1,6 @@
 FROM docker:dind as BUILD
 FROM ghcr.io/astral-sh/uv:python3.11-alpine AS UV_BUILD
-FROM hailgenetics/hail:0.2.136-py3.11
+FROM hailgenetics/hail:0.2.138-py3.11
 COPY --from=BUILD /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=UV_BUILD /usr/local/bin/uv /usr/local/bin/uv
 LABEL maintainer="Broad TGG"
