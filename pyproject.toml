@@ -3,7 +3,7 @@ name = "seqr-loading-pipeline"
 dynamic = ['version']
 requires-python = ">=3.11"
 dependencies = [
-    "hail==0.2.136", # NB: when upgrading hail, manually verify the below jupyter pins
+    "hail==0.2.138", # NB: when upgrading hail, manually verify the below jupyter pins
     "luigi==3.5.2",
     "gnomad==0.8.0",
     "aiofiles==24.1.0",
