@@ -9,7 +9,7 @@ import luigi.worker
 
 from loading_pipeline.lib.core import DatasetType, ReferenceGenome, SampleType
 from loading_pipeline.lib.misc.validation import ALL_VALIDATIONS
-from loading_pipeline.lib.paths import ancestry_model_rf_path
+from loading_pipeline.lib.paths import ancestry_model_rf_path, tdr_metrics_dir
 from loading_pipeline.lib.tasks.write_sample_qc_json import WriteSampleQCJsonTask
 from loading_pipeline.lib.test.mock_complete_task import MockCompleteTask
 from loading_pipeline.lib.test.mocked_reference_datasets_testcase import (
@@ -41,10 +41,8 @@ class WriteSampleQCJsonTaskTest(MockedReferenceDatasetsTestCase):
     @patch('loading_pipeline.lib.methods.sample_qc.assign_population_pcs')
     @patch('loading_pipeline.lib.methods.sample_qc.pc_project')
     @patch('loading_pipeline.lib.tasks.write_sample_qc_json.WriteTDRMetricsFilesTask')
-    @patch('loading_pipeline.lib.tasks.write_sample_qc_json.hfs.ls')
     def test_call_sample_qc(
         self,
-        mock_ls_tdr_dir: Mock,
         mock_tdr_task: Mock,
         mock_pc_project: Mock,
         mock_assign_population_pcs: Mock,
@@ -54,14 +52,15 @@ class WriteSampleQCJsonTaskTest(MockedReferenceDatasetsTestCase):
             exist_ok=True,
         )
         shutil.copy2(TEST_ANCESTRY_IMPUTATION_MODEL_PATH, ancestry_model_rf_path())
+        os.makedirs(
+            tdr_metrics_dir(ReferenceGenome.GRCh38, DatasetType.SNV_INDEL),
+            exist_ok=True,
+        )
+        shutil.copy2(
+            TEST_TDR_METRICS_FILE,
+            tdr_metrics_dir(ReferenceGenome.GRCh38, DatasetType.SNV_INDEL),
+        )
         mock_tdr_task.return_value = MockCompleteTask()
-        mock_tdr_table = Mock()
-        mock_tdr_table.path = TEST_TDR_METRICS_FILE
-        # Note, hfs.ls is getting mocked in every module not just write_sample_qc_json?
-        # It seems as though hfs is import-cached somehow, which leads to a single
-        # object being used globally.
-        mock_tdr_table.size = 10
-        mock_ls_tdr_dir.return_value = [mock_tdr_table]
         mock_pc_project.return_value = hl.Table.parallelize(
             [
                 {
@@ -105,7 +104,6 @@ class WriteSampleQCJsonTaskTest(MockedReferenceDatasetsTestCase):
             ),
             None,
         )
-
         worker = luigi.worker.Worker()
         task = WriteSampleQCJsonTask(
             reference_genome=ReferenceGenome.GRCh38,
