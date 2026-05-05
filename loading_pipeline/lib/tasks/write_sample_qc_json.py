@@ -59,7 +59,7 @@ class WriteSampleQCJsonTask(luigi.Task):
                 import_tdr_qc_metrics(tdr_metrics_file.path),
             )
         pop_pca_loadings_ht = hl.read_table(self.input()[2].path)
-        with hl.hadoop_open(self.input()[3].path, 'rb') as f:
+        with hfs.open(self.input()[3].path, 'rb') as f:
             ancestry_rf_model = onnx.load(f)
         callset_mt = call_sample_qc(
             callset_mt,
