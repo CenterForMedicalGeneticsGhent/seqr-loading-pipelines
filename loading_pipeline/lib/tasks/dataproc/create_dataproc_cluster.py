@@ -15,10 +15,10 @@ from loading_pipeline.lib.tasks.base.base_loading_pipeline_params import (
 )
 from loading_pipeline.lib.tasks.dataproc.misc import get_cluster_name
 
-DEBIAN_IMAGE = '2.2.5-debian12'
+DEBIAN_IMAGE = '2.3.17-debian12'
 DISK_SIZE_GB = 600
 HAIL_VERSION = hl.version().split('-')[0]
-INSTANCE_TYPE = 'n1-highmem-8'
+INSTANCE_TYPE = 'n4-highmem-8'
 PKGS = '|'.join(
     [
         x.replace('gnomad_qc @ ', '').replace('onnxconverter-common @ ', '')
