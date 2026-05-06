@@ -6,8 +6,8 @@ import luigi.worker
 
 from loading_pipeline.lib.core import DatasetType, ReferenceGenome, SampleType
 from loading_pipeline.lib.misc.validation import ALL_VALIDATIONS
-from loading_pipeline.lib.tasks.update_variant_annotations_table_with_new_samples import (
-    UpdateVariantAnnotationsTableWithNewSamplesTask,
+from loading_pipeline.lib.tasks.update_variant_annotations_table_with_new_variants import (
+    UpdateVariantAnnotationsTableWithNewVariantsTask,
 )
 from loading_pipeline.lib.tasks.write_variant_annotations_vcf import (
     WriteVariantAnnotationsVCF,
@@ -58,7 +58,7 @@ class WriteVariantAnnotationsVCFTest(MockedReferenceDatasetsTestCase):
         mock_load_gencode.return_value = GENE_ID_MAPPING
         worker = luigi.worker.Worker()
         update_variant_annotations_task = (
-            UpdateVariantAnnotationsTableWithNewSamplesTask(
+            UpdateVariantAnnotationsTableWithNewVariantsTask(
                 reference_genome=ReferenceGenome.GRCh38,
                 dataset_type=DatasetType.SV,
                 run_id='run_id1',

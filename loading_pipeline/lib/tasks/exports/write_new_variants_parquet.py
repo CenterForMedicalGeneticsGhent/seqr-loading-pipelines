@@ -19,8 +19,8 @@ from loading_pipeline.lib.tasks.exports.misc import (
     unmap_formatting_annotation_enums,
 )
 from loading_pipeline.lib.tasks.files import GCSorLocalTarget
-from loading_pipeline.lib.tasks.update_variant_annotations_table_with_new_samples import (
-    UpdateVariantAnnotationsTableWithNewSamplesTask,
+from loading_pipeline.lib.tasks.update_variant_annotations_table_with_new_variants import (
+    UpdateVariantAnnotationsTableWithNewVariantsTask,
 )
 from loading_pipeline.lib.tasks.write_new_variants_table import (
     WriteNewVariantsTableTask,
@@ -46,7 +46,7 @@ class WriteNewVariantsParquetTask(BaseWriteParquetTask):
             # that lives at the new variants table path.
             and len(self.project_guids) > 0
         ):
-            return self.clone(UpdateVariantAnnotationsTableWithNewSamplesTask)
+            return self.clone(UpdateVariantAnnotationsTableWithNewVariantsTask)
         return self.clone(WriteNewVariantsTableTask)
 
     def create_table(self) -> None:
