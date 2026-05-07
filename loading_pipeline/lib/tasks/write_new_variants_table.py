@@ -12,6 +12,7 @@ from loading_pipeline.lib.annotations.misc import (
 from loading_pipeline.lib.misc.callsets import get_callset_ht
 from loading_pipeline.lib.misc.io import checkpoint, remap_pedigree_hash
 from loading_pipeline.lib.misc.math import constrain
+from loading_pipeline.lib.misc.vep import run_vep
 from loading_pipeline.lib.paths import (
     new_variants_table_path,
     project_pedigree_path,
@@ -31,7 +32,6 @@ from loading_pipeline.lib.tasks.files import GCSorLocalTarget
 from loading_pipeline.lib.tasks.write_metadata_for_run import (
     WriteMetadataForRunTask,
 )
-from loading_pipeline.lib.misc.vep import run_vep
 
 VARIANTS_PER_VEP_PARTITION = 1e3
 MIN_PARTITIONS = 10

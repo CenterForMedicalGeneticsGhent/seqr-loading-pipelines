@@ -7,8 +7,8 @@ from loading_pipeline.lib.core import (
     DatasetType,
     ReferenceGenome,
 )
-from loading_pipeline.lib.test.mocked_dataroot_testcase import MockedDatarootTestCase
 from loading_pipeline.lib.misc.vep import run_vep
+from loading_pipeline.lib.test.mocked_dataroot_testcase import MockedDatarootTestCase
 from loading_pipeline.var.test.vep.mock_vep_data import (
     MOCK_37_VEP_DATA,
     MOCK_38_VEP_DATA,
