@@ -50,7 +50,7 @@ class PipelineWorkerTest(MockedDatarootTestCase, ClickhouseSchemaTestCase):
     @patch(
         'loading_pipeline.lib.tasks.write_new_variants_table.load_gencode_ensembl_to_refseq_id',
     )
-    @patch('loading_pipeline.lib.vep.hl.vep')
+    @patch('loading_pipeline.lib.misc.vep.hl.vep')
     @patch('loading_pipeline.lib.misc.slack._safe_post_to_slack')
     @patch('loading_pipeline.bin.pipeline_worker.logger')
     def test_process_queue_integration_test(
