@@ -14,6 +14,7 @@ Notes on Loading Pipeline Orchestration
 		- Manual environment variables and secrets, lack of cohesion with kubernetes.
 		- Composer was its own Kubernetes ecosystem!
 		- GCP integration.
+		- Hooks for replacing python API calls... (why????)
 		- Nasty bugs
 			https://github.com/broadinstitute/seqr/pull/3995/changes
 			https://github.com/broadinstitute/seqr/pull/4539/changes
@@ -36,6 +37,16 @@ Notes on Loading Pipeline Orchestration
 	- Failures moved to deadletter queue after 5 retries.
 - Loading pipeline runs "Luigi" via --local-scheduler locally or via Dataproc.
 	- Luigi manages task flow and nothing else.
+- Output looks like:
+```
+gs://seqr-hail-search-data/v3.1/GRCh38/SNV_INDEL/runs/20260421-125644-303855/_CLICKHOUSE_LOAD_SUCCESS
+gs://seqr-hail-search-data/v3.1/GRCh38/SNV_INDEL/runs/20260421-125644-303855/_SUCCESS
+gs://seqr-hail-search-data/v3.1/GRCh38/SNV_INDEL/runs/20260421-125644-303855/metadata.json
+gs://seqr-hail-search-data/v3.1/GRCh38/SNV_INDEL/runs/20260421-125644-303855/new_entries.parquet/
+gs://seqr-hail-search-data/v3.1/GRCh38/SNV_INDEL/runs/20260421-125644-303855/new_variant_details.parquet/
+gs://seqr-hail-search-data/v3.1/GRCh38/SNV_INDEL/runs/20260421-125644-303855/new_variants.ht/
+gs://seqr-hail-search-data/v3.1/GRCh38/SNV_INDEL/runs/20260421-125644-303855/new_variants.parquet/
+```
 
 ### Residues from previous iterations.
 - Manual enumeration of consequence terms and SV/Mito types is no longer necessary.
@@ -45,10 +56,14 @@ Notes on Loading Pipeline Orchestration
 	- Necessary for performance, but as the pipeline has started doing less it is less necessary.
 	- Historically been the source of many bugs.  
 		- For example, re-running pipeline with a different pedigree... we'd cached the subsetted callset, failed to generate a new one etc.
+- Globalizing and Deglobalizing Ids.
+	- We optimized the hail table structure to move sample ids into globals, this complicates the current logic and is likely unnecessary.  
 
 ## Thoughts for future:
 	- Remove Hail for non SNV_INDEL dataset types and callsets < 500 samples.
 	- Resolve the "Fatal Flaw", two separate representations of production variants, one in Hail and one in Clickhouse.
+		- If pipeline fails immediately after "UpdateVariantAnnotationsTableWithNewVariantsTask", next run will have 
+		incorrect "new_variants.parquet".
 	- Lightweight replacement for Luigi "run()/complete()/output()/requires()" framework.
 	- Eliminate scheduler in favor or "tasks" table in seqr postgres.
 	- Running arbitrary docker images:
