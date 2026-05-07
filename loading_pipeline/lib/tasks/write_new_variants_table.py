@@ -31,7 +31,7 @@ from loading_pipeline.lib.tasks.files import GCSorLocalTarget
 from loading_pipeline.lib.tasks.write_metadata_for_run import (
     WriteMetadataForRunTask,
 )
-from loading_pipeline.lib.vep import run_vep
+from loading_pipeline.lib.misc.vep import run_vep
 
 VARIANTS_PER_VEP_PARTITION = 1e3
 MIN_PARTITIONS = 10

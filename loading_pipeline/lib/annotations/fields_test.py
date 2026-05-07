@@ -8,7 +8,7 @@ from loading_pipeline.lib.core import (
     ReferenceGenome,
 )
 from loading_pipeline.lib.test.mocked_dataroot_testcase import MockedDatarootTestCase
-from loading_pipeline.lib.vep import run_vep
+from loading_pipeline.lib.misc.vep import run_vep
 from loading_pipeline.var.test.vep.mock_vep_data import (
     MOCK_37_VEP_DATA,
     MOCK_38_VEP_DATA,
@@ -19,7 +19,7 @@ class FieldsTest(MockedDatarootTestCase):
     def setUp(self) -> None:
         super().setUp()
 
-    @patch('loading_pipeline.lib.vep.hl.vep')
+    @patch('loading_pipeline.lib.misc.vep.hl.vep')
     def test_get_formatting_fields(self, mock_vep: Mock) -> None:
         for reference_genome, ht, expected_fields in [
             (

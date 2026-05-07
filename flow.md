@@ -11,6 +11,14 @@ Pipeline flow, as of 05/06/2026
                        ValidateCallsetTask
                        (validation checks)
                                 |
+                 _______________|_______________
+                |                               |
+                v                               v
+    WriteSexCheckTableTask    WriteRelatednessCheckTableTask
+                |                               |
+                v                               v
+                         WriteRelatednessCheckTsvTask
+                                |
                                 v
            _____________________|_____________________
           |                                           |

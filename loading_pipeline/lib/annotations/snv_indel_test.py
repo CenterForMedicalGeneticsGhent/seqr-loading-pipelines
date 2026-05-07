@@ -5,7 +5,7 @@ import hail as hl
 
 from loading_pipeline.lib.annotations import shared, snv_indel
 from loading_pipeline.lib.core import DatasetType, ReferenceGenome
-from loading_pipeline.lib.vep import run_vep
+from loading_pipeline.lib.misc.vep import run_vep
 from loading_pipeline.var.test.vep.mock_vep_data import (
     MOCK_37_VEP_DATA,
     MOCK_38_VEP_DATA,
@@ -13,7 +13,7 @@ from loading_pipeline.var.test.vep.mock_vep_data import (
 
 
 class SNVTest(unittest.TestCase):
-    @patch('loading_pipeline.lib.vep.hl.vep')
+    @patch('loading_pipeline.lib.misc.vep.hl.vep')
     def test_sorted_transcript_consequences_37(
         self,
         mock_vep: Mock,
@@ -93,7 +93,7 @@ class SNVTest(unittest.TestCase):
             ],
         )
 
-    @patch('loading_pipeline.lib.vep.hl.vep')
+    @patch('loading_pipeline.lib.misc.vep.hl.vep')
     def test_sorted_transcript_consequences_38(
         self,
         mock_vep: Mock,
@@ -246,7 +246,7 @@ class SNVTest(unittest.TestCase):
             ],
         )
 
-    @patch('loading_pipeline.lib.vep.hl.vep')
+    @patch('loading_pipeline.lib.misc.vep.hl.vep')
     def test_sorted_other_feature_consequences(
         self,
         mock_vep: Mock,
