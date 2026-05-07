@@ -1,5 +1,6 @@
-Pipeline flow, as of 05/06/2026
-                      
+# Pipeline flow, as of 05/06/2026
+
+```
                       WriteImportedCallsetTask
                       (VCF → Hail Matrix Table)
                                 |
@@ -59,3 +60,4 @@ Pipeline flow, as of 05/06/2026
           v
   WriteClickhouseLoadSuccessFileTask
   (load parquets → ClickHouse)
+```
