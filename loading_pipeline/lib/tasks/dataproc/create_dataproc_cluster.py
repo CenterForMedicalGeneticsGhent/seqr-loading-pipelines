@@ -17,6 +17,7 @@ from loading_pipeline.lib.tasks.dataproc.misc import get_cluster_name
 
 DEBIAN_IMAGE = '2.3.17-debian12'
 DISK_SIZE_GB = 600
+DISK_TYPE = 'hyperdisk-balanced'
 HAIL_VERSION = hl.version().split('-')[0]
 INSTANCE_TYPE = 'n4-highmem-8'
 PKGS = '|'.join(
@@ -64,7 +65,7 @@ def get_cluster_config(
                 'num_instances': 1,
                 'machine_type_uri': INSTANCE_TYPE,
                 'disk_config': {
-                    'boot_disk_type': 'pd-standard',
+                    'boot_disk_type': DISK_TYPE,
                     'boot_disk_size_gb': DISK_SIZE_GB,
                 },
             },
@@ -72,7 +73,7 @@ def get_cluster_config(
                 'num_instances': dataset_type.dataproc_primary_workers,
                 'machine_type_uri': INSTANCE_TYPE,
                 'disk_config': {
-                    'boot_disk_type': 'pd-standard',
+                    'boot_disk_type': DISK_TYPE,
                     'boot_disk_size_gb': DISK_SIZE_GB,
                 },
             },
@@ -80,7 +81,7 @@ def get_cluster_config(
                 'num_instances': dataset_type.dataproc_preemptibles,
                 'machine_type_uri': INSTANCE_TYPE,
                 'disk_config': {
-                    'boot_disk_type': 'pd-standard',
+                    'boot_disk_type': DISK_TYPE,
                     'boot_disk_size_gb': DISK_SIZE_GB,
                 },
                 'is_preemptible': True,
