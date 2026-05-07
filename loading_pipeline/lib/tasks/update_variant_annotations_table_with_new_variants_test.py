@@ -118,7 +118,7 @@ class UpdateVariantAnnotationsTableWithNewVariantsTaskTest(
         ],
     )
     @patch.object(ReferenceGenome, 'standard_contigs', new_callable=PropertyMock)
-    @patch('loading_pipeline.lib.vep.hl.vep')
+    @patch('loading_pipeline.lib.misc.vep.hl.vep')
     @patch(
         'loading_pipeline.lib.tasks.write_new_variants_table.load_gencode_ensembl_to_refseq_id',
     )
@@ -361,7 +361,7 @@ class UpdateVariantAnnotationsTableWithNewVariantsTaskTest(
             ],
         )
 
-    @patch('loading_pipeline.lib.vep.hl.vep')
+    @patch('loading_pipeline.lib.misc.vep.hl.vep')
     def test_update_vat_grch37(
         self,
         mock_vep: Mock,
