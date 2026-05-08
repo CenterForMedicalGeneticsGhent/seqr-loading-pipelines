@@ -4,12 +4,13 @@ ClickHouse Design Decisions
 
 ### Entries Table
 - Grouping by family was most efficient at query-time and was a wash on-disk.
-- ORDER BY project_guid, family_guid, sample_type, is_gnomad_gt_5_percent, is_annotated_in_any_gene, key
+- ORDER BY `project_guid, family_guid, sample_type, is_gnomad_gt_5_percent, is_annotated_in_any_gene, key`
 	- Support searches on project or family
-- PROJECTION on is_gnomad_gt_5_percent, is_annotated_in_any_gene, xpos
+- PROJECTION on `is_gnomad_gt_5_percent`, `is_annotated_in_any_gene`, `xpos`
 	- Static view over gnomad constructed at load time.
 	- Note that an update to gnomad _requires_ rebuilding this!!!!
 		- I would try to be clever about this, identifying the variants that change when gnomad updates
+		- From experience, dropping or adding columns NOT in the sorting key is very easy... impossible if it is.
 	- `is_annotated_in_gene` (lightweight boolean index to support gene search)
 	- xpos ordering supports sorts on gene/position.
 - `geneId_ids` Array(UInt32)
