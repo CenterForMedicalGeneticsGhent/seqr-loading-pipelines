@@ -32,7 +32,6 @@ from loading_pipeline.lib.tasks.validate_callset import ValidateCallsetTask
 from loading_pipeline.lib.tasks.write_relatedness_check_tsv import (
     WriteRelatednessCheckTsvTask,
 )
-from loading_pipeline.lib.tasks.write_sample_qc_json import WriteSampleQCJsonTask
 from loading_pipeline.lib.tasks.write_sex_check_table import WriteSexCheckTableTask
 from loading_pipeline.lib.tasks.write_validation_errors_for_run import (
     with_persisted_validation_errors,
@@ -97,17 +96,6 @@ class WriteRemappedAndSubsettedCallsetTask(BaseWriteTask):
                 *requirements,
                 self.clone(WriteRelatednessCheckTsvTask),
                 self.clone(WriteSexCheckTableTask),
-            ]
-        if (
-            FeatureFlag.EXPECT_TDR_METRICS
-            and not self.skip_expect_tdr_metrics
-            and self.dataset_type.expect_tdr_metrics(
-                self.reference_genome,
-            )
-        ):
-            requirements = [
-                *requirements,
-                self.clone(WriteSampleQCJsonTask),
             ]
         return requirements
 
@@ -209,11 +197,6 @@ class WriteRemappedAndSubsettedCallsetTask(BaseWriteTask):
                 key='s',
             ),
         )
-        # Drop additional fields imported onto the intermediate callsets but
-        # not used when creating the downstream optimized tables.
-        for field in mt.row_value:
-            if field not in self.dataset_type.row_fields:
-                mt = mt.drop(field)
 
         if self.dataset_type.overwrite_male_non_par_calls:
             mt = overwrite_male_non_par_calls(mt, loadable_families)
