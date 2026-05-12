@@ -32,7 +32,7 @@
 - `RANGE_HASHED()` for ranges.
 - dictGets and JOIN tables are super fast (10M/S) so even N joins is much faster than RocksDB table access.
 
-### seqrdb dicts
+### SeqrDB Dicts
 - Postgres backed dictionaries.
 - Postgres named collection set up in infrastructure.
 - These are essential, providing fast access within ClickHouse to Postgres itself.
@@ -85,13 +85,13 @@ Optional:
 - `max_server_memory_usage_to_ram_ratio` instructs ClickHouse to use less of the server's memory.  Since we mount `/in-memory-dir` we allocate resources away from ClickHouse without its knowledge.
 - `background_pool_size`, `background_merges_mutations_concurrency_ratio`, `number_of_free_entries_in_pool_to_execute_mutation`, `number_of_free_entries_in_pool_to_lower_max_size_of_merge`, `number_of_free_entries_in_pool_to_execute_optimize_entire_partition` allow limiting the number of background threads for background tasks.  This has been helpful for protecting search performance at the cost of longer background operations.
 
-#### Running a single host.  
+#### Running a Single Host  
 Clickhouse and the Helm installation support replication and scaling with either a Zookeeper or Clickhouse-Keeper managed cluster.  Given our prioritization of Consistency >> Availability, and the complexity of managing a cluster, we've opted for the simplicity of maintaining a single host, accepting the risk of limited downtime both in search and loading.
 
 #### Backups
 We have a cron in the [seqr codebase](https://github.com/broadinstitute/seqr/blob/master/deploy/docker/seqr/clickhouse_backup.py) that manages incremental backups of the the Broad `seqr`'s database.  The `rocksdb` tables are backed up with a cloud storage rsync cron.
 
-#### Project sub-partitions.
+#### Project Sub-Partitions
 Select `GRCh38/SNV_INDEL` WGS projects are subpartitioned via a static mapping, set up as a one time operation w/ a rough goal of 500m rows per partition.  Our largest projects far exceed ClickHouse's recommended maximum partition, and operations on coalesced single partitions are single threaded (slowing down `OPTIMIZE TABLE FINAL` like no other).  Supporting sub-partitions lets us parallelize
 any `OPTIMIZE TABLE` and in general leads to more manageable chunks of data.  
 
@@ -100,12 +100,12 @@ follow this pattern.  We have code and unit-tests to support both partitioning p
 
 ## Miscellaneous
 
-#### Learning about ClickHouse.
+#### Learning About ClickHouse
 - PostHog's [Clickhouse explainers](https://posthog.com/blog/clickhouse)
 - Andy Pavlo's [DB Course](https://www.youtube.com/watch?v=nhlpwmOBEiE)
 - The ClickHouse Documentation.
 
-#### Debugging Advice:
+#### Debugging Advice
 - Logging into the client:
 ```
 kubectl port-forward services/seqr-clickhouse 9000:9000
