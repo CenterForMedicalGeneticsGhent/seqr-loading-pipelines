@@ -1,4 +1,4 @@
-ClickHouse Design Decisions
+# ClickHouse Design Decisions
 
 ## Schema
 
@@ -64,12 +64,11 @@ to ensure things finish reliably and do not leave partial state!
 - `entries`/`project_gt_stats`/`gt_stats` cascade was required for reasonable performance
 of recomputing allele frequencies.  We did try loading without multiple descending views, but re-grouping the whole `entries` table OOMs.
 
-
 ### History of Nasty Bugs
 - Incorrectly named the on-disk tables `/variants/details` instead of `/variants_details` which caused issues because of an existing `/variants` path.
 - Missing `affected_status` in materialized view ORDER BY, leading to undefined behavior.
+- Mis-typed a gnomad allele frequency, incorrectly rounding down AFs.
 - Infinite issues with column ordering, missing fields, and types.
-
 
 ## Infrastructure
 
