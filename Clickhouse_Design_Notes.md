@@ -41,12 +41,34 @@ ClickHouse Design Decisions
 	- Search queries reference them too.
 - Performantly refreshable!
 
+### Incremental vs Refreshable Materialized Views
+- Incremental MVs are pointers between two actual tables, when data is inserted into the first it is copied
+to the second with a transformation.
+- Refreshable MVs are more analagous to other DBs, full data is generated on a schedule or manually.
+    - All Refreshable MVs in seqr are set to a refresh frequency of every 10 years.
+- Incremental MVs cannot be "built".
+
 ### RocksDB
 The dependency on RocksDB is the weak point of the ClickHouse backend.  The data structure is opaque, hard to reason about and improve, and challenging to query and update.  Schema migrations are not supported, backups are manual and failure-prone, and the Engine is not supported in the managed ClickHouse Inc product.  It solves a key problem for us, however, supporting fast key-value access over both small and large blobs of strings. 
 
 Only Key/Value access is really supported for the RocksDB tables.  Queries such as `SELECT ... WHERE key > 0 and key < 100000` are very slow and should be avoided.
 
-## Loading
+### Ingestion Architecture & Async Tasks
+- Many operations in ClickHouse are asynchrnous and happen in the background.  Careful attention must be paid
+to ensure things finish reliably and do not leave partial state!
+- Load is structured around a `staging` database and [atomic partition movement](https://clickhouse.com/blog/table-cloning).
+    - All `entries` tables and materialized views are schema-copied into `staging`.
+    - All data is inserted into `staging`.
+    - `staging` environment must be 'verified'.
+    - Dictionaries are rebuilt only in `production` database!
+- `entries`/`project_gt_stats`/`gt_stats` cascade was required for reasonable performance
+of recomputing allele frequencies.  We did try loading without multiple descending views, but re-grouping the whole `entries` table OOMs.
+
+
+### History of Nasty Bugs
+- Incorrectly named the on-disk tables `/variants/details` instead of `/variants_details` which caused issues because of an existing `/variants` path.
+- Missing `affected_status` in materialized view ORDER BY, leading to undefined behavior.
+- Infinite issues with column ordering, missing fields, and types.
 
 
 ## Infrastructure
