@@ -34,7 +34,7 @@ jobs:
             -p 9000:9000 \
             -e CLICKHOUSE_USER=default \
             -e CLICKHOUSE_PASSWORD=default_password \
-            bitnamilegacy/clickhouse:latest
+            gcr.io/seqr-project/seqr-clickhouse:26.3.9
       - name: Wait for ClickHouse
         run: |
           until docker exec clickhouse clickhouse-client --query "SELECT 1"; do
