@@ -56,6 +56,7 @@ RUN uv sync --group dev --locked
 ```
 
 ### [Install](https://clickhouse.com/docs/getting-started/quick-start/oss) & start ClickHouse with provided test configuration:
+> **Note:** We are running ClickHouse `26.3.9-lts` in production.
 ```bash
 curl https://clickhouse.com/ | sh
 ./clickhouse server --config-file=./seqr-loading-pipelines/loading_pipeline/var/clickhouse_config/test-clickhouse.xml
